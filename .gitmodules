@@ -1,0 +1,2 @@
+[submodule "third-party/qemu"] 
+	url = https://git.qemu.org/git/qemu.git 

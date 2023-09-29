@@ -1,0 +1,7 @@
+[workspace]
+members = [
+	"feryr_fuzzer",
+	"feryr_prog",
+	"feryr_util",
+	"feryr_debug",
+] 
