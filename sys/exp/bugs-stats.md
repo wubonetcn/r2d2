@@ -1,3 +1,5 @@
+## bugs found in Ros-Rolling
+
 | #  | Scope/Module         | Bug Type               | Operations                                         |
 |----|----------------------|------------------------|----------------------------------------------------|
 | 1  | Runtime/rmw_fastrtps | Data-race              | ~Condition / wait                                  |
@@ -15,3 +17,12 @@
 | 13 | Runtime/ROSIDL       | memory leaks           | get_typesupport_handle_function                    |
 | 14 | Runtime/tlsf_cpp     | memory leaks           | initialize                                         |
 | 15 | Runtime/tlsf_cpp     | memory leaks           | tlsf_heap_allocator                                |
+
+
+## Bug count in 24H evaluation
+| **Tools** | **Autoware** | **Turtlebot3** | **Navigator2** | **Turtlesim** | **Runtime** | **Sum** |
+|:---------:|:------------:|:--------------:|:--------------:|:-------------:|:-----------:|:-------:|
+| R2D2      | 7            | 6              | 2              | 0             | 9           | 24      |
+| ROZZ      | 3            | 5              | 4              | 0             | 2           | 12      |
+| Robofuzz  | 0            | 9              | 0              | 2             | 5           | 16      |
+| Ros2Fuzz  | 0            | 0              | 1              | 0             | 0           | 1       |
