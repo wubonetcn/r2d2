@@ -154,30 +154,81 @@ impl Cover {
     }
 
     // called when normally exec a prog, check if is interesting
-    // pub fn check_if_interesting(&self, trace_cover: &mut Cover) -> Result<bool, failure::Error> {
-    //     let trace_bits = self.read_bits();
-    //     let hnb = self
-    //         .has_new_bits(trace_bits.virgin_bits, trace_bits)
-    //         .unwrap();
-    //     println!("hnb = %{}\n", &hnb);
+    pub fn check_if_interesting(&self, trace_cover: &mut Cover) -> Result<bool, failure::Error> {
+        let trace_bits = self.read_bits();
+        let hnb = self
+            .has_new_bits(trace_bits.virgin_bits, trace_bits)
+            .unwrap();
+        println!("hnb = %{}\n", &hnb);
 
-    //     let mut cp_trace_bits = trace_cover
-    //         .bit_map
-    //         .write()
-    //         .map_err(|_| failure::format_err!("Failed to lock!"))?;
+        let mut cp_trace_bits = trace_cover
+            .bit_map
+            .write()
+            .map_err(|_| failure::format_err!("Failed to lock!"))?;
 
-    //     self.classify_counts(&mut cp_trace_bits).unwrap();
-    //     let mut virgin_bits = self
-    //         .bit_map
-    //         .write()
-    //         .map_err(|_| failure::format_err!("Failed to lock!"))?;
+        self.classify_counts(&mut cp_trace_bits).unwrap();
+        let mut virgin_bits = self
+            .bit_map
+            .write()
+            .map_err(|_| failure::format_err!("Failed to lock!"))?;
 
-    //     if hnb != 0 {
-    //         println!("new path found !!!\n");
-    //         Ok(true)
-    //     } else {
-    //         println!("opps! No path found !!!\n");
-    //         Ok(false)
-    //     }
-    // }
+        if hnb != 0 {
+            println!("new path found !!!\n");
+            Ok(true)
+        } else {
+            println!("opps! No path found !!!\n");
+            Ok(false)
+        }
+    }
+
+    pub fn read_cover_file(&self, file_name: &str) -> Result<Box<[u8]>, failure::Error> {
+        let file = OpenOptions::new().read(true).write(true).open(file_name);
+        match file {
+            Err(e) => {
+                dbg!("open coverage shm file failed");
+                return Err(failure::format_err!("{:?}", e));
+            }
+            Ok(file) => {
+                let mut cover_shm = unsafe { MmapOptions::new().map_mut(&file)? };
+                let mut buf = vec![0u8; BRANCHES_SIZE];
+                buf.copy_from_slice(&cover_shm[0..BRANCHES_SIZE]);
+                Ok(buf.into_boxed_slice())
+            }
+        }
+    }
+
+    pub fn check_new_cover(&self, dir_name: &str) -> Result<bool, failure::Error> {
+        let mut ret = false;
+        let mut new_cover = false;
+        let mut cover = vec<Cover>;
+        let mut dir = fs::read_dir(dir_name)?;
+        for entry in dir {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() {
+                let file_name = path.to_str().unwrap();
+                if file_name.contains("cover") {
+                    new_cover = true;
+                    new_cover_file = file_name.to_string();
+                    new_cover_bits = self.read_cover_file(file_name)?;
+                    cover.push(Cover {
+                        branch: 0,
+                        last_branch: 0,
+                        virgin_bits: new_cover_bits,
+                    });
+                    break;
+                }
+            }
+        }
+
+        for sub_cover in cover {
+            if self.check_if_interesting(sub_cover)? {
+                ret = true;
+                break;
+            }
+        }
+        
+        Ok(ret)
+    }
+
 }

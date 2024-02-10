@@ -1,5 +1,5 @@
 use crate::{corpus_handle::models::OnnxModel, get_name_full, RE};
-
+use crate::{cover_handle::models::Cover, get_new_cover};
 use super::{
     super::{get_name_short, string_hasher, EventType, ExecError, CHECK_LEN},
     callback::*,
@@ -705,6 +705,47 @@ impl CallGraph {
     pub fn add_trace(&mut self, call_trace: &CallTrace) {
         self.event_trace
             .insert(call_trace.id, call_trace.to_owned());
+    }
+
+    pub fn is_interest_traces(&mut self, trace: CallTrace) -> Result<bool, failure::Error> {
+        let mut flag = false;
+        if self.check_new_cover(&"/dev/shm/mod_cover".to_string())? {
+            return Ok(true);
+        }
+        // if self.event_trace.contains_key(&trace.id) {
+        //     let global_trace = self.event_trace.get_mut(&trace.id).unwrap();
+        //     for i in 0..global_trace.trace.len() {
+        //         // get the i th element in global_trace.trace
+        //         let global_cb = global_trace.trace.iter_mut().nth(i).unwrap().1;
+        //         let local_cb = trace.trace.iter().nth(i).unwrap().1;
+        //         if global_cb.duration < local_cb.duration {
+        //             flag = true;
+        //             //  global_cb.end_time and global_cb.start_time and global_cb.duration set to local_cb's
+        //             global_cb.reset_duration(local_cb.duration);
+        //             global_cb.reset_start_time(local_cb.start_time.clone());
+        //             global_cb.reset_end_time(local_cb.end_time.clone());
+        //         }
+        //     }
+        //     if global_trace.time_set.len() > *CHECK_LEN {
+        //         let upper_bound: f64 = global_trace.mean + (2.0 * global_trace.std_diva);
+        //         let lower_bound: f64 = global_trace.mean - (2.0 * global_trace.std_diva);
+        //         // not compliant to std divation
+        //         if (trace.cur_latency as f64) > upper_bound
+        //             || (trace.cur_latency as f64) < lower_bound
+        //         {
+        //             return Err(failure::Error::from(ExecError::TimeOutError(
+        //                 "Timeout Detected!".to_string(),
+        //             )));
+        //         } else {
+        //             return Ok(flag);
+        //         }
+        //     } else {
+        //         return Ok(flag);
+        //     }
+        // } else {
+        //     self.event_trace.insert(trace.id, trace);
+        //     return Ok(true);
+        // }
     }
 
     pub fn is_interest_traces(&mut self, trace: CallTrace) -> Result<bool, failure::Error> {

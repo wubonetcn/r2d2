@@ -4,4 +4,5 @@ members = [
 	"feryr_prog",
 	"feryr_util",
 	"feryr_debug",
+	"rozz_cover",
 ] 
