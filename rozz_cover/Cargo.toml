@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "module_analysis", "analysis", "mem_analysis_runtime", "common", "sancov_runtime", "generator_helper"
+]
+
+[profile.release]
+#debug = true
+panic = "abort"
